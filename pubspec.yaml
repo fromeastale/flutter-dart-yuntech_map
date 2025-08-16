@@ -14,9 +14,10 @@ dependencies:
   flutter_map: ^6.0.0
   latlong2: ^0.9.1
   xml: ^6.1.0
-  cupertino_icons: ^1.0.0
+  cupertino_icons: ^1.0.8
   geolocator: ^13.0.2       # 之後做定位#還不知道功用
   permission_handler: ^11.3.1 #還不知道功用
+  flutter_svg: ^2.0.7 #還不知道功用
 
   three_dart:
     git:
@@ -27,8 +28,6 @@ dependencies:
       url: https://github.com/wasabia/flutter_gl.git
       ref: 5a46e357fef86cb228096322ea9cec175d301a0f
       path: flutter_gl
-
-  cupertino_icons: ^1.0.8 #還不知道功用
 
 dependency_overrides:
   flutter_gl:

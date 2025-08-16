@@ -10,11 +10,9 @@ import 'osm_parser.dart';
 
 // 📥 畫面導入
 import 'screens/map_screen.dart';
-import 'screens/game5.dart';
-import 'screens/game6.dart';
-import 'screens/game9.dart';
-import 'screens/ranking.dart';
-import 'screens/settings.dart';
+import 'games/game5.dart';
+import 'games/game6.dart';
+import 'games/game9.dart';
 
 // 🧩 分頁元件
 import 'pages/home_page.dart';
@@ -87,8 +85,8 @@ class CampusApp extends StatelessWidget {
         '/game5': (context) => const Game5(),
         '/game6': (context) => const Game6(),
         '/game9': (context) => const Game9(),
-        '/ranking': (context) => const RankingPage(),
-        '/settings': (context) => const SettingsPage(),
+        //'/ranking': (context) => const RankingPage(),
+        //'/settings': (context) => const SettingsPage(),
         //'/three': (context) => const ThreeScene(), // ❌ 暫時移除
       },
     );
@@ -199,6 +197,16 @@ class HelloTestPage extends StatelessWidget {
       body: Center(
         child: Text("👋 Hello, Flutter! 測試畫面"),
       ),
+    );
+  }
+}
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: HelloTestPage(), // 使用你已定義的 HelloTestPage
     );
   }
 }
