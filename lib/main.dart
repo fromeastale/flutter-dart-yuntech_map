@@ -3,13 +3,14 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'package:latlong2/latlong.dart';
+import 'package:project/demo/game_dev_page.dart';
 
 // 📦 模型與解析器
 import 'models/building.dart';
 import 'osm_parser.dart';
 
 // 📥 畫面導入
-import 'screens/map_screen.dart';
+import 'screens/map_screen.dart' as screen;
 import 'games/game5.dart';
 import 'games/game6.dart';
 import 'games/game9.dart';
@@ -17,6 +18,7 @@ import 'games/game9.dart';
 // 🧩 分頁元件
 import 'pages/home_page.dart';
 import 'pages/nav_page.dart';
+/*import 'pages/unified_game_dev_page.dart';*/
 import 'pages/game_page.dart';
 import 'pages/info_page.dart';
 
@@ -40,7 +42,10 @@ Future<void> main() async {
   }
 
   runZonedGuarded(() {
-    runApp(const CampusApp());
+    runApp(CampusApp(
+      boundary: yuntechBoundary,
+      buildings: campusBuildings,
+    ));
   }, (error, stackTrace) {
     print("❌ App crash: $error");
     print("📛 Stack trace: $stackTrace");
@@ -48,7 +53,14 @@ Future<void> main() async {
 }
 
 class CampusApp extends StatelessWidget {
-  const CampusApp({super.key});
+  final List<LatLng> boundary;
+  final List<Building> buildings;
+
+  const CampusApp({
+    required this.boundary,
+    required this.buildings,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -75,33 +87,49 @@ class CampusApp extends StatelessWidget {
           height: 70,
         ),
       ),
-      home: const _RootTabs(),
+      home: _RootTabs(boundary: boundary, buildings: buildings),
       routes: {
         '/dev': (context) => const DevHomePage(),
-        '/map': (context) => MapScreen(
-              boundary: yuntechBoundary,
-              buildings: campusBuildings,
+       // '/game_dev': (context) => const GameDevPage(),
+        '/map': (context) => screen.MapScreen(
+              boundary: boundary,
+              buildings: buildings,
             ),
         '/game5': (context) => const Game5(),
         '/game6': (context) => const Game6(),
         '/game9': (context) => const Game9(),
-        //'/ranking': (context) => const RankingPage(),
-        //'/settings': (context) => const SettingsPage(),
-        //'/three': (context) => const ThreeScene(), // ❌ 暫時移除
       },
     );
   }
 }
 
 class _RootTabs extends StatefulWidget {
-  const _RootTabs();
+  final List<LatLng> boundary;
+  final List<Building> buildings;
+
+  const _RootTabs({
+    required this.boundary,
+    required this.buildings,
+  });
+
   @override
   State<_RootTabs> createState() => _RootTabsState();
 }
 
 class _RootTabsState extends State<_RootTabs> {
-  int _index = 2; // 預設停在「遊戲」
-  final _pages = const [HomePage(), NavPage(), GamePage(), InfoPage()];
+  int _index = 2;
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomePage(boundary: widget.boundary, buildings: widget.buildings),
+      NavPage(boundary: yuntechBoundary, buildings: campusBuildings),
+      const GamePage(),
+      const InfoPage(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -183,30 +211,6 @@ class GameEntryButton extends StatelessWidget {
           Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
         },
       ),
-    );
-  }
-}
-
-class HelloTestPage extends StatelessWidget {
-  const HelloTestPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    print("📣 HelloTestPage build triggered");
-    return const Scaffold(
-      body: Center(
-        child: Text("👋 Hello, Flutter! 測試畫面"),
-      ),
-    );
-  }
-}
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HelloTestPage(), // 使用你已定義的 HelloTestPage
     );
   }
 }

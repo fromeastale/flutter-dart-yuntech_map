@@ -15,9 +15,10 @@ dependencies:
   latlong2: ^0.9.1
   xml: ^6.1.0
   cupertino_icons: ^1.0.8
-  geolocator: ^13.0.2       # 之後做定位#還不知道功用
+  geolocator: ^13.0.2       # 之後做定位
   permission_handler: ^11.3.1 #還不知道功用
   flutter_svg: ^2.0.7 #還不知道功用
+  
 
   three_dart:
     git:
@@ -75,3 +76,9 @@ flutter:
     - assets/icons/ghostSkill_6.svg
     - assets/icons/ghostSkill_7.svg
     - assets/icons/ghostSkill_8.svg
+    - assets/icons/toilet.svg
+    - assets/icons/parkinglot.svg
+    - assets/icons/ATM.svg
+    - assets/icons/water.svg
+    - assets/icons/elevator.svg
+    - assets/icons/wheelchair.svg

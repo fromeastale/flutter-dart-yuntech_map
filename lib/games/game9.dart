@@ -10,20 +10,19 @@ class Game9 extends StatefulWidget {
 }
 
 class _Game9State extends State<Game9> {
-  // 數獨資料與狀態
   late List<List<int?>> puzzle;
   late List<List<bool>> isInitial;
   late List<List<Set<int>>> notes;
   int? selectedRow, selectedCol;
   bool noteMode = false;
 
-  // 時間與鍵盤監聽
   late DateTime startTime;
   final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    _focusNode.requestFocus();
     final board = SudokuGenerator(emptySquares: 40).newSudoku;
 
     puzzle = List.generate(9, (i) => List.generate(9, (j) {
@@ -42,7 +41,6 @@ class _Game9State extends State<Game9> {
     super.dispose();
   }
 
-  // 驗證是否符合數獨規則
   bool isValid(int row, int col, int value) {
     for (int i = 0; i < 9; i++) {
       if ((puzzle[row][i] == value && i != col) ||
@@ -63,7 +61,6 @@ class _Game9State extends State<Game9> {
     return true;
   }
 
-  // 是否整盤完成且正確
   bool isBoardCompleteAndCorrect() {
     for (int row = 0; row < 9; row++) {
       for (int col = 0; col < 9; col++) {
@@ -74,12 +71,12 @@ class _Game9State extends State<Game9> {
     return true;
   }
 
-  // 設定格子數字或筆記
   void setValue(int value) {
     if (selectedRow == null || selectedCol == null || isInitial[selectedRow!][selectedCol!]) return;
 
     if (noteMode) {
       setState(() {
+        puzzle[selectedRow!][selectedCol!] = null;
         notes[selectedRow!][selectedCol!].contains(value)
             ? notes[selectedRow!][selectedCol!].remove(value)
             : notes[selectedRow!][selectedCol!].add(value);
@@ -120,14 +117,14 @@ class _Game9State extends State<Game9> {
     }
   }
 
-  // 清除格子
   void clearSelectedCell() {
     if (selectedRow == null || selectedCol == null || isInitial[selectedRow!][selectedCol!]) return;
     setState(() {
       puzzle[selectedRow!][selectedCol!] = null;
       notes[selectedRow!][selectedCol!] = <int>{};
     });
-  }  @override
+  }
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: RawKeyboardListener(
@@ -151,12 +148,9 @@ class _Game9State extends State<Game9> {
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-
-              // 筆記模式切換
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("筆記模式"),
                   Switch(
                     value: noteMode,
                     onChanged: (value) {
@@ -165,70 +159,88 @@ class _Game9State extends State<Game9> {
                       });
                     },
                   ),
+                  const SizedBox(width: 8),
+                  Text(
+                    noteMode ? '📝 筆記模式' : '✍️ 作答模式',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: noteMode ? Colors.purple : Colors.black,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
-
-              // 棋盤格顯示
               Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(12),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 9,
-                    mainAxisSpacing: 2,
-                    crossAxisSpacing: 2,
-                  ),
-                  itemCount: 81,
-                  itemBuilder: (context, index) {
-                    final row = index ~/ 9;
-                    final col = index % 9;
-                    final value = puzzle[row][col];
-                    final selected = selectedRow == row && selectedCol == col;
-                    final isNote = notes[row][col].isNotEmpty && value == null;
-                    final isInit = isInitial[row][col];
+                child: Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width < 500
+                        ? MediaQuery.of(context).size.width - 24
+                        : 500,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: GridView.builder(
+                        padding: const EdgeInsets.all(4),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 9,
+                          mainAxisSpacing: 2,
+                          crossAxisSpacing: 2,
+                        ),
+                        itemCount: 81,
+                        itemBuilder: (context, index) {
+                          final row = index ~/ 9;
+                          final col = index % 9;
+                          final value = puzzle[row][col];
+                          final selected = selectedRow == row && selectedCol == col;
+                          final isNote = notes[row][col].isNotEmpty && value == null;
+                          final isInit = isInitial[row][col];
 
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedRow = row;
-                          selectedCol = col;
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: selected ? Colors.blueAccent : Colors.grey,
-                            width: selected ? 2.5 : 0.5,
-                          ),
-                          color: selected
-                              ? Colors.lightBlue.shade100
-                              : (row ~/ 3 + col ~/ 3) % 2 == 0
-                              ? Colors.white
-                              : Colors.grey.shade100,
-                        ),
-                        child: Center(
-                          child: isNote
-                              ? Text(
-                            notes[row][col].join(', '),
-                            style: const TextStyle(fontSize: 10, color: Colors.grey),
-                          )
-                              : Text(
-                            value?.toString() ?? '',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: isInit ? FontWeight.bold : FontWeight.normal,
-                              color: isInit ? Colors.black : Colors.deepPurple,
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedRow = row;
+                                selectedCol = col;
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: selected ? Colors.deepPurple : Colors.grey,
+                                  width: selected ? 2.5 : 0.5,
+                                ),
+                                color: selected
+                                    ? (noteMode ? Colors.purple.shade100 : Colors.deepPurple.shade100)
+                                    : (row ~/ 3 + col ~/ 3) % 2 == 0
+                                        ? Colors.white
+                                        : Colors.grey.shade100,
+                              ),
+                              child: Center(
+                                child: isNote
+                                    ? Text(
+                                        notes[row][col].take(4).join(', '),
+                                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                                      )
+                                    : Text(
+                                        value?.toString() ?? '',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: isInit ? FontWeight.bold : FontWeight.normal,
+                                          color: isInit ? Colors.black : Colors.deepPurple,
+                                        ),
+                                      ),
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 ),
-              ),              const SizedBox(height: 8),
-              buildNumberPadWrap(), // 數字鍵盤（響應式排列）
+              ),
+              const SizedBox(height: 8),
+              buildNumberPadWrap(),
               const SizedBox(height: 12),
-              buildClearButton(),   // 清除格子按鈕
+              buildClearButton(),
               const SizedBox(height: 24),
             ],
           ),
@@ -236,9 +248,7 @@ class _Game9State extends State<Game9> {
       ),
     );
   }
-
-  // 數字鍵盤（1～9），用 Wrap 自動換行排版
-  Widget buildNumberPadWrap() {
+    Widget buildNumberPadWrap() {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -249,6 +259,10 @@ class _Game9State extends State<Game9> {
           height: 56,
           child: ElevatedButton(
             onPressed: () => setValue(i + 1),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: noteMode ? Colors.purple.shade200 : Colors.deepPurple,
+              foregroundColor: Colors.white,
+            ),
             child: Text(
               '${i + 1}',
               style: const TextStyle(fontSize: 20),
@@ -259,7 +273,6 @@ class _Game9State extends State<Game9> {
     );
   }
 
-  // 清除格子按鈕
   Widget buildClearButton() {
     return SizedBox(
       width: 180,

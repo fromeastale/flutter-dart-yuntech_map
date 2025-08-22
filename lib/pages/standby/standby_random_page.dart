@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../demo/mock_match_demo.dart';
+import '../../logic/mock_match_demo.dart';
 
 class StandbyRandomPage extends StatefulWidget {
   final String meId;

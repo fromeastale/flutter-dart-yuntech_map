@@ -1,17 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../demo/mock_match_demo.dart';
+import '../services/location_service.dart';
+import '../logic/mock_match_demo.dart';
+import '../demo/game_dev_page.dart';
 import 'standby/standby_random_page.dart';
 import 'standby/standby_private_page.dart';
 
 // 小遊戲測試用，可刪 ↓↓↓
 import '../games/qte_circular_game.dart' as mini1;       // QTECircularGame
 import '../games/color_blind_test_game.dart' as mini2;   // ColorBlindTestGame
+import '../games/game5.dart' as mini3;
+import '../games/game6.dart' as mini4;
+import '../games/game9.dart' as mini5;
 // 小遊戲測試用，可刪 ↑↑↑
 
-class GamePage extends StatelessWidget {
+class GamePage extends StatefulWidget {
   const GamePage({super.key});
+
+  @override
+  State<GamePage> createState() => _GamePageState();
+}
+
+class _GamePageState extends State<GamePage> {
+  final locationService = LocationService();
+
+  @override
+  void initState() {
+    super.initState();
+    initLocation(); // ✅ 初始化定位
+  }
+
+  void initLocation() async {
+    try {
+      final position = await locationService.getCurrentPosition();
+      print('目前位置：${position.latitude}, ${position.longitude}');
+    } catch (e) {
+      print('定位錯誤：$e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,77 +125,62 @@ class GamePage extends StatelessWidget {
       ),
     );
   }
+}
 
   /// 頭像＋名稱＋成就列（成就1：QTE、成就2：色盲） —— 小遊戲測試用，可刪
   Widget _profileHeader(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2))],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              const CircleAvatar(
-                radius: 28, backgroundColor: Color(0xFF80C8C7),
-                child: Icon(Icons.person, color: Colors.white, size: 28),
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white, borderRadius: BorderRadius.circular(16),
+      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2))],
+    ),
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      children: [
+        Row(
+          children: [
+            const CircleAvatar(
+              radius: 28, backgroundColor: Color(0xFF80C8C7),
+              child: Icon(Icons.person, color: Colors.white, size: 28),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('玩家名稱', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  SizedBox(height: 2),
+                  Text('簡介', style: TextStyle(color: Colors.black54)),
+                ],
               ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('玩家名稱', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                    SizedBox(height: 2),
-                    Text('簡介', style: TextStyle(color: Colors.black54)),
-                  ],
-                ),
-              ),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.share_outlined)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              // 成就1 → QTE 圓環 —— 小遊戲測試用，可刪
-              _chipButton(
-                label: '成就1',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => mini1.QTECircularGame( // 類名要全大寫 QTE
-                        onGameEnd: (bool _) => Navigator.pop(context),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(width: 8),
-              // 成就2 → 色盲測試 —— 小遊戲測試用，可刪
-              _chipButton(
-                label: '成就2',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => mini2.ColorBlindTestGame(
-                        onGameEnd: (bool _) => Navigator.pop(context), // 需要 bool 參數
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(width: 8),
-              _chipButton(label: '成就3', onTap: () {}),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+            ),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.share_outlined)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            _chipButton(label: '成就1'), // 不連結任何功能
+            const SizedBox(width: 8),
+            _chipButton(label: '成就2'),
+            const SizedBox(width: 8),
+            _chipButton(label: '成就3'),
+            const SizedBox(width: 8),
+            _chipButton(
+              label: '遊戲測試',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const GameDevPage()),
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _chipButton({required String label, VoidCallback? onTap}) {
     return InkWell(
@@ -250,8 +262,58 @@ class GamePage extends StatelessWidget {
     );
   }
 
+  Widget _gameTestPanel(BuildContext context) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Divider(height: 32),
+      const Text('🎮 遊戲測試區', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+      const SizedBox(height: 8),
+      Wrap(
+        spacing: 12, runSpacing: 12,
+        children: [
+          _testButton(context, 'QTE 圓環', () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => mini1.QTECircularGame(onGameEnd: (_) => Navigator.pop(context))),
+          )),
+          _testButton(context, '色盲測試', () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => mini2.ColorBlindTestGame(onGameEnd: (_) => Navigator.pop(context))),
+          )),
+          _testButton(context, 'Game5', () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => mini3.Game5()),
+          )),
+          _testButton(context, 'Game6', () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => mini4.Game6()),
+          )),
+          _testButton(context, 'Game9', () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => mini5.Game9()),
+          )),
+        ],
+      ),
+    ],
+  );
+}
+
+Widget _testButton(BuildContext context, String label, VoidCallback onTap) {
+  return FilledButton.icon(
+    onPressed: onTap,
+    icon: const Icon(Icons.play_arrow),
+    label: Text(label),
+    style: FilledButton.styleFrom(
+      backgroundColor: const Color(0xFF00918E),
+      shape: const StadiumBorder(),
+    ),
+  );
+}
+
+
+
   // 小遊戲測試用，可刪（若想在頁面底部再放兩顆測試按鈕，解註這個方法的呼叫）
-  Widget _miniGameTestPanel(BuildContext context) {
+  /*Widget _miniGameTestPanel(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -300,5 +362,4 @@ class GamePage extends StatelessWidget {
             style: TextStyle(fontSize: 12, color: Colors.black54)),
       ],
     );
-  }
-}
+  }*/
